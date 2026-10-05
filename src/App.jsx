@@ -88,6 +88,47 @@ function App() {
     document.documentElement.lang = language === "bn" ? "bn" : "en";
   }, [language]);
 
+  useEffect(() => {
+    async function loadDefaultBuilding() {
+      try {
+        const response = await fetch("/default-building.json");
+
+        if (!response.ok) {
+          throw new Error("Could not load default building.");
+        }
+
+        const parsed = await response.json();
+
+        const result = validateBuilding(parsed);
+
+        if (!result.valid) {
+          console.error("Default building validation failed:", result.errors);
+
+          return;
+        }
+
+        setBuilding(parsed);
+
+        setSelectedStart("");
+
+        setHazardState({
+          blocked_nodes: [...parsed.initial_state.blocked_nodes],
+          blocked_edges: [...parsed.initial_state.blocked_edges],
+          closed_exits: [...parsed.initial_state.closed_exits],
+        });
+
+        setFileStatus(null);
+        setFileErrors([]);
+      } catch (error) {
+        console.error("Default building failed to load:", error);
+      }
+    }
+
+    loadDefaultBuilding();
+  }, []);
+
+  [];
+
   function handleFileImport(event) {
     const file = event.target.files?.[0];
 
